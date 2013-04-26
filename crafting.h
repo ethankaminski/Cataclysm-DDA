@@ -45,6 +45,7 @@ struct recipe {
     time = 0;
     reversible = false;
     autolearn = false;
+    learn_by_disassembly = false;
   }
 
 recipe(std::string pident, int pid, itype_id pres, craft_cat pcat, const char *p1,

@@ -137,21 +137,21 @@ struct mission {
  std::string save_info();
  void load_info(game *g, std::ifstream &info);
 
- mission()
+ mission() :
+  type(NULL),
+  description(""),
+  failed(false),
+  value(0),
+  uid(-1),
+  target(point(-1, -1)),
+  item_id("null"),
+  count(0),
+  deadline(0),
+  npc_id(-1),
+  good_fac_id(-1),
+  bad_fac_id(-1),
+  step(0)
  {
-  type = NULL;
-  description = "";
-  failed = false;
-  value = 0;
-  uid = -1;
-  target = point(-1, -1);
-  item_id = "null";
-  count = 0;
-  deadline = 0;
-  npc_id = -1;
-  good_fac_id = -1;
-  bad_fac_id = -1;
-  step = 0;
  }
 };
 

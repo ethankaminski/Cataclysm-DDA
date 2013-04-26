@@ -82,8 +82,8 @@ struct game_message
  calendar turn;
  int count;
  std::string message;
- game_message() { turn = 0; count = 1; message = ""; };
- game_message(calendar T, std::string M) : turn (T), message (M) { count = 1; };
+ game_message() : turn(0), count(1), message("") { };
+ game_message(calendar T, std::string M) : turn (T), count(1), message (M) { };
 };
 
 struct mtype;

@@ -248,6 +248,7 @@ struct itype
  itype() {
   id = "null";
   rarity = 0;
+  price = 0;
   name  = "none";
   sym = '#';
   color = c_white;
@@ -256,7 +257,9 @@ struct itype
   phase = SOLID;
   volume = 0;
   weight = 0;
+  bigness_aspect = 0;
   melee_dam = 0;
+  melee_cut = 0;
   m_to_hit = 0;
   item_flags = 0;
   techniques = 0;
@@ -530,6 +533,7 @@ struct it_armor : public itype
   env_resist = 0;
   warmth = 0;
   storage = 0;
+  power_armor = false;
  }
 
  it_armor(itype_id pid, unsigned char prarity, unsigned int pprice,
