@@ -1,11 +1,11 @@
 #include "faction.h"
 #include "facdata.h"
 #include "rng.h"
-#include "math.h"
 #include "output.h"
 #include "omdata.h"
 #include "game.h"
 
+#include <math.h>
 #include <sstream>
 
 std::string invent_name();
