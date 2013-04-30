@@ -42,7 +42,7 @@ typedef struct
 //Individual lines, so that we can track changed lines
 typedef struct{
 bool touched;
-char *chars;
+wchar_t *chars;
 char *FG;
 char *BG;
 //cursechar chars [80];

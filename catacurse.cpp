@@ -170,7 +170,7 @@ inline void FillRectDIB(int x, int y, int width, int height, unsigned char color
 void DrawWindow(WINDOW *win)
 {
     int i,j,drawx,drawy;
-    char tmp;
+    wchar_t tmp;
     for (j=0; j<win->height; j++){
         if (win->line[j].touched)
             for (i=0; i<win->width; i++){
