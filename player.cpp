@@ -365,7 +365,7 @@ void player::update_mental_focus()
     // for every 100 points, we have a flat gain of 1 focus.
     // for every n points left over, we have an n% chance of 1 focus
     int gain = focus_gain_rate / 100;
-    if (rng(0, 100) < (focus_gain_rate % 100))
+    if (rng(1, 100) <= (focus_gain_rate % 100))
     {
         gain++;
     }
@@ -383,7 +383,7 @@ int player::calc_focus_equilibrium()
     // apply a penalty when improving skills via books
     if (activity.type == ACT_READ)
     {
-        it_book *reading = dynamic_cast<it_book*>(inv.item_by_letter(activity.invlet).type);
+        it_book *reading = dynamic_cast<it_book *>(inv.item_by_letter(activity.invlet).type);
         // only apply a penalty when we're actually learning something
         if (skillLevel(reading->type) < (int)reading->level)
         {
@@ -428,10 +428,21 @@ int player::calc_focus_equilibrium()
                 // We can't afford the entire block.  Each block_multiplier morale
                 // points give 1% focus gain, and then we're done.
                 focus_gain_rate += morale_left / block_multiplier;
+                break;
             }
         }
     }
-    if (focus_gain_rate < 1) { focus_gain_rate = 1; }
+
+    // This should be redundant, but just in case...
+    if (focus_gain_rate < 1)
+    {
+        focus_gain_rate = 1;
+    }
+    else if (focus_gain_rate > 400)
+    {
+        focus_gain_rate = 400;
+    }
+
     return focus_gain_rate;
 }
 
@@ -6294,22 +6305,21 @@ void player::practice (const calendar& turn, Skill *s, int amount)
     }
 
     amount = adjust_for_focus(amount);
-
-    int newLevel;
-
-    while (level.isTraining() && amount > 0 && xp_pool >= (1 + level))
+    if (isSavant && s != savantSkill)
     {
-        amount -= level + 1;
-        if (!isSavant || s == savantSkill || one_in(2))
-        {
-            skillLevel(s).train(newLevel);
-        }
+        amount /= 2;
     }
-    int chance_to_drop = xp_pool;
-    xp_pool -= chance_to_drop / 100;
-    if (rng(0, 100) < (chance_to_drop % 100))
+
+    if (level.isTraining())
     {
-        xp_pool--;
+        skillLevel(s).train(amount);
+
+        int chance_to_drop = xp_pool;
+        xp_pool -= chance_to_drop / 100;
+        if (rng(1, 100) <= (chance_to_drop % 100))
+        {
+            xp_pool--;
+        }
     }
 
     skillLevel(s).practice(turn);
