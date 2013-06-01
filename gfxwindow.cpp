@@ -1,4 +1,4 @@
-#if (defined _WIN32 || defined WINDOWS)
+#if (defined TILES)
 #include "game.h"
 #include "catajson.h"
 #include "mapdata.h"
@@ -9,8 +9,14 @@
 #include <cstdlib>
 #include <fstream>
 
+// SDL includes are in a different place on Windows
+#if (defined _WIN32 || defined WINDOWS)
 #include "SDL.h"
 #include "SDL_ttf.h"
+#else
+#include "SDL/SDL.h"
+#include "SDL/SDL_ttf.h"
+#endif
 
 struct gfxtile
 {
@@ -46,7 +52,7 @@ void GfxDraw(game* g, int destx, int desty, int centerx, int centery, int width,
 void load_picture()
 {
 	if(tile) SDL_FreeSurface(tile);
-	tile  = SDL_LoadBMP("gfx\\tile.bmp");
+	tile  = SDL_LoadBMP("gfx/tile.bmp");
 	SDL_SetColorKey(tile, SDL_SRCCOLORKEY, SDL_MapRGB(tile->format, 128, 255, 255));
 }
 
