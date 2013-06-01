@@ -1,5 +1,6 @@
 #if (defined TILES)
 #include "catacurse.h"
+#include "game.h"
 #include "options.h"
 #include "output.h"
 #include "color.h"
@@ -21,7 +22,7 @@
 
 WINDOW *mainwin;
 static SDL_Color windowsPalette[256];
-static SDL_Surface *screen = NULL;
+SDL_Surface *screen = NULL;
 TTF_Font* font;
 int nativeWidth;
 int nativeHeight;
@@ -39,6 +40,15 @@ int halfwidth;          //half of the font width, used for centering lines
 int halfheight;          //half of the font height, used for centering lines
 pairs *colorpairs;   //storage for pair'ed colored, should be dynamic, meh
 int echoOn;     //1 = getnstr shows input, 0 = doesn't show. needed for echo()-ncurses compatibility.
+
+
+extern bool show_gfx_window;
+extern bool gfx_window_fullscreen;
+extern WINDOW* request_gfx_window;
+extern SDL_Surface* bscreen;
+extern void CreateGfxWindow();
+extern void DestroyGfxWindow();
+extern void GfxDraw(game* g, int destx, int desty, int centerx, int centery, int width, int height);
 
 //***********************************
 //Non-curses, Window functions      *
@@ -150,12 +160,21 @@ static void OuputText(char* t, int x, int y, int n, unsigned char color)
 
 void DrawWindow(WINDOW *win)
 {
-    int i,j,drawx,drawy;
+    int i,j,drawx,drawy, jr=0;
     char tmp;
 
+    SDL_Rect update = {win->x * fontwidth, 9999,
+                   win->width * fontwidth, 9999};
     for (j=0; j<win->height; j++){
         if (win->line[j].touched)
         {
+            if (update.y == 9999)
+            {
+                update.y = (win->y+j)*fontheight;
+				jr=j;
+            }
+			update.h = (j-jr+1)*fontheight;
+
             win->line[j].touched=false;
 
             for (i=0; i<win->width; i++){
@@ -225,22 +244,56 @@ void DrawWindow(WINDOW *win)
         }
     };// for (j=0;j<_windows[w].height;j++)
     win->draw=false;                //We drew the window, mark it as so
-    //if (update.top != -1)
-    //{
-		SDL_Flip(screen);
-    //}
+
+	extern game* thegame;
+	if(thegame && show_gfx_window && thegame->w_terrain==win)
+	{
+		update.y = win->y*fontheight;
+		update.h = win->height*fontheight;
+		GfxDraw(thegame, win->x*fontwidth, win->y*fontheight, thegame->terrain_view_x, thegame->terrain_view_y, win->width*fontwidth, win->height*fontheight);
+	}
+
+    if (update.y != 9999)
+    {
+		SDL_UpdateRect(screen, update.x, update.y, update.w, update.h);
+    }
 }
 
 //Check for any window messages (keypress, paint, mousemove, etc)
 void CheckMessages()
 {
+	extern game* thegame;
 	SDL_Event ev;
 	while(SDL_PollEvent(&ev))
 	{
 		switch(ev.type)
 		{
 			case SDL_KEYDOWN:
-			if ( (ev.key.keysym.unicode & 0xFF80) == 0 ) {
+			if(ev.key.keysym.sym==SDLK_F3)
+			{
+				if(!bscreen) CreateGfxWindow();
+				show_gfx_window = !show_gfx_window;
+				if(thegame) thegame->refresh_all();
+				break;
+			}
+			else if(ev.key.keysym.sym==SDLK_F4)
+			{
+				gfx_window_fullscreen = !gfx_window_fullscreen;
+				// unused for now
+				break;
+			}
+			else if(ev.key.keysym.sym==SDLK_F5)
+			{
+				CreateGfxWindow();
+				//reload all resources from disk
+				if(thegame) thegame->refresh_all();
+				break;
+			}
+			else if(ev.key.keysym.sym==SDLK_RSHIFT || ev.key.keysym.sym==SDLK_LSHIFT || ev.key.keysym.sym==SDLK_RCTRL || ev.key.keysym.sym==SDLK_LCTRL)
+			{
+				break; // temporary fix for unwanted keys
+			}
+			else if ( (ev.key.keysym.unicode & 0xFF80) == 0 ) {
 				lastchar = ev.key.keysym.unicode & 0x7F;
 				switch (lastchar){
 					case 13:            //Reroute ENTER key for compatilbity purposes
@@ -270,6 +323,7 @@ void CheckMessages()
 				lastchar = KEY_NPAGE;
 			  
 			}
+
 				break;
 			case SDL_QUIT:
 				endwin();
@@ -680,6 +734,7 @@ int clear(void)
 int endwin(void)
 {
 	TTF_CloseFont(font);
+	DestroyGfxWindow();
     WinDestroy();
     return 1;
 };

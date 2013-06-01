@@ -3250,6 +3250,9 @@ void game::draw_ter(int posx, int posy)
   posx = u.posx + u.view_offset_x;
  if (posy == -999)
   posy = u.posy + u.view_offset_y;
+
+ terrain_view_x = posx; terrain_view_y = posy;
+
  m.build_map_cache(this);
  m.draw(this, w_terrain, point(posx, posy));
 
